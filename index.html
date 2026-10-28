@@ -194,7 +194,7 @@ function layout(){DPR=Math.min(2,window.devicePixelRatio||1);W=innerWidth;H=inne
  L.wheel={x:SA.l,y:H,R:Math.max(120,Math.min(175,H*.42))};
  const bw=Math.min(W*.42,420);L.bow={w:bw,h:bw*IMG.bow.height/IMG.bow.width,x:W/2};
  L.butt={x:W/2+bw*.16,y:H+18};L.tip0={x:W/2-W*.03,y:Math.max(SA.t+70,H*.23)};
- L.nearY=Math.max(L.hz+50,H*.7);L.farY=L.hz+12;
+ L.hudB=hudBottom();L.nearY=Math.max(L.hz+50,H*.7);L.farY=L.hz+12;
 }
 // ---------- game state ----------
 const G={st:'idle',t:0,mv:0,mt:0,zone:[.78,.9],dist:0,perfect:false,bob:{x:0,y:0,sc:1,dip:0},fish:null,bite:0,nib:0,nibT:0,castT:0,from:null,
@@ -373,12 +373,17 @@ function draw(){const c=cx;c.setTransform(DPR,0,0,DPR,0,0);
  if(G.flash>0){c.fillStyle='rgba(255,255,255,'+G.flash*.6+')';c.fillRect(0,0,W,H);}
  if(G.st==='fight'&&G.fight.ten>.75){const a=(G.fight.ten-.75)*1.6*(.6+.4*Math.sin(G.t*18));const g=c.createRadialGradient(W/2,H/2,H*.3,W/2,H/2,W*.7);g.addColorStop(0,'rgba(255,0,0,0)');g.addColorStop(1,'rgba(255,30,30,'+a+')');c.fillStyle=g;c.fillRect(0,0,W,H);}
 }
-const SIGNS=[{t:'SHUM',x0:181/1024,x1:235/1024,y0:188/576,y1:220/576,c:'#ff3fd0',seed:1.7},{t:'AUKERMAN',x0:701/1024,x1:775/1024,y0:171/576,y1:210/576,c:'#2ff5ff',seed:4.3}];
+const SIGNS=[{t:'SHUM',x0:176/1024,x1:240/1024,y0:236/576,y1:264/576,c:'#ff3fd0',seed:1.7,bk:[179,186,58,36],fy:[175,318]},{t:'AUKERMAN',x0:690/1024,x1:790/1024,y0:228/576,y1:262/576,c:'#2ff5ff',seed:4.3,bk:[699,169,80,44],fy:[160,322]}];
+function hudBottom(){let b=0;document.querySelectorAll('#hud>*').forEach(e=>{b=Math.max(b,e.getBoundingClientRect().bottom);});return b;}
 const NFONT='"Avenir Next Condensed","Arial Narrow",Impact,system-ui,sans-serif';
 function hx(a){return Math.round(clamp(a,0,1)*255).toString(16).padStart(2,'0');}
 function drawNeon(c,na,wxd){const B=L.bg,iw=IMG.bg.width*B.s+16,ih=IMG.bg.height*B.s+8,ox=B.ox-8,oy=B.oy-4;const glow=Math.min(1,.5+na*.7+wxd*.4);
  if(na>.3){c.save();c.globalCompositeOperation='lighter';for(let i=0;i<70;i++){const r=STARS[i];const x=ox+(.03+r[0]*.94)*iw,y=oy+(.36+r[1]*.2)*ih;c.fillStyle='rgba(255,200,120,'+((na-.3)*.6*(.4+.6*Math.abs(Math.sin(r[2]*50))))+')';c.fillRect(x,y,2,2.4);}c.restore();}
- SIGNS.forEach(sg=>{let x0=ox+sg.x0*iw,x1=ox+sg.x1*iw,y0=oy+sg.y0*ih,y1=oy+sg.y1*ih;
+ SIGNS.forEach(sg=>{const fsx=iw/1024,fsy=ih/576,IS=IMG.bg.width/1024;
+  {const k=sg.bk;const sh=k[3]+4;c.drawImage(IMG.bg,k[0]*IS,(k[1]+sh)*IS,k[2]*IS,k[3]*IS,ox+k[0]*fsx,oy+k[1]*fsy,k[2]*fsx,k[3]*fsy);
+   if(na>0||wxd>0){c.fillStyle='rgba(6,14,40,'+Math.min(.82,na*.68+wxd*(1-na*.5))+')';c.fillRect(ox+k[0]*fsx,oy+k[1]*fsy,k[2]*fsx,k[3]*fsy);}}
+  let x0=ox+sg.x0*iw,x1=ox+sg.x1*iw,y0=oy+sg.y0*ih,y1=oy+sg.y1*ih;
+  const hb=(L.hudB||0)+8,lim=oy+sg.fy[1]*fsy-(y1-y0)-4;if(y0<hb){const d=Math.min(hb-y0,Math.max(0,lim-y0));y0+=d;y1+=d;}
   const w=x1-x0,h=y1-y0,cxm=(x0+x1)/2,cym=(y0+y1)/2;
   const t=G.t+sg.seed;let fl=.93+.07*Math.sin(t*37)*Math.sin(t*13);const k=Math.sin(t*.7)*Math.sin(t*2.3);if(k>.9)fl*=(Math.sin(t*90)>0?.3:.9);
   const a=glow*fl;
